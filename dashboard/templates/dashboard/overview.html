@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Market Overview - FutureSight{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-left">
+        <h1>Market Overview</h1>
+        <p class="subtitle">Real-time analysis active • Last update: <span id="last-update">2s ago</span></p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-secondary">
+            <span>📅</span> Today
+        </button>
+        <button class="btn btn-primary">
+            <span>+</span> New Forecast
+        </button>
+    </div>
+</div>
+
+<!-- Market Overview Cards -->
+<div class="market-cards">
+    <div class="market-card">
+        <div class="card-header">
+            <span class="card-title">S&P 500</span>
+            <span class="trend-icon">📈</span>
+        </div>
+        <div class="card-value">
+            {% if indicators.sp500 %}
+                {{ indicators.sp500.value|floatformat:2 }}
+            {% else %}
+                4,132.45
+            {% endif %}
+        </div>
+        <div class="card-change positive">
+            {% if indicators.sp500 %}
+                +{{ indicators.sp500.change_percent|floatformat:1 }}%
+            {% else %}
+                +1.2%
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="market-card">
+        <div class="card-header">
+            <span class="card-title">BTC/USD</span>
+            <span class="trend-icon">📈</span>
+        </div>
+        <div class="card-value">
+            {% if indicators.btc %}
+                ${{ indicators.btc.value|floatformat:2 }}
+            {% else %}
+                $68,420.10
+            {% endif %}
+        </div>
+        <div class="card-change positive">
+            {% if indicators.btc %}
+                +{{ indicators.btc.change_percent|floatformat:1 }}%
+            {% else %}
+                +4.5%
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="market-card">
+        <div class="card-header">
+            <span class="card-title">ETH/USD</span>
+            <span class="trend-icon">📉</span>
+        </div>
+        <div class="card-value">
+            {% if indicators.eth %}
+                ${{ indicators.eth.value|floatformat:2 }}
+            {% else %}
+                $3,892.55
+            {% endif %}
+        </div>
+        <div class="card-change negative">
+            {% if indicators.eth %}
+                {{ indicators.eth.change_percent|floatformat:1 }}%
+            {% else %}
+                -0.8%
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="market-card">
+        <div class="card-header">
+            <span class="card-title">AI Accuracy</span>
+            <span class="trend-icon">🤖</span>
+        </div>
+        <div class="card-value">87.4%</div>
+        <div class="card-subtitle">Last 24h</div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="dashboard-grid">
+    <!-- Bitcoin Details Section -->
+    <div class="dashboard-section large">
+        <div class="section-header">
+            <div class="asset-header">
+                <div class="asset-icon">B</div>
+                <div>
+                    <h2>Bitcoin</h2>
+                    <p>BTC/USD • Coinbase</p>
+                </div>
+            </div>
+            <div class="section-actions">
+                <span class="badge badge-primary">AI PREDICTION ACTIVE</span>
+                <button class="btn btn-icon">+</button>
+                <button class="btn btn-icon">⚙️</button>
+            </div>
+        </div>
+        
+        <div class="timeframe-selector">
+            <button class="timeframe-btn">1H</button>
+            <button class="timeframe-btn active">4H</button>
+            <button class="timeframe-btn">1D</button>
+            <button class="timeframe-btn">1W</button>
+        </div>
+        
+        <div class="target-price">
+            <div class="target-label">Target Price (4H)</div>
+            <div class="target-value">$69,500.00</div>
+            <div class="target-change positive">+2.4% Predicted ↑</div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="btcChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Signal Feed -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h3>Signal Feed</h3>
+            <span class="badge badge-success">LIVE</span>
+        </div>
+        <div class="signal-list">
+            {% for signal in signals|slice:":5" %}
+            <div class="signal-item">
+                <div class="signal-header">
+                    <span class="signal-asset">{{ signal.asset }}</span>
+                    <span class="signal-type {{ signal.signal_type|lower }}">{{ signal.signal_type }}</span>
+                    <span class="signal-time">{{ signal.created_at|timesince }} ago</span>
+                </div>
+                {% if signal.entry_price %}
+                <div class="signal-details">
+                    <span>Entry: {{ signal.entry_price }}</span>
+                    <span>Target: {{ signal.target_price }}</span>
+                </div>
+                <div class="signal-confidence">Confidence: {{ signal.confidence }}%</div>
+                {% else %}
+                <div class="signal-notes">{{ signal.notes }}</div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="signal-item">
+                <div class="signal-header">
+                    <span class="signal-asset">NVDA</span>
+                    <span class="signal-type long">LONG</span>
+                    <span class="signal-time">2m ago</span>
+                </div>
+                <div class="signal-details">
+                    <span>Entry: 892.40</span>
+                    <span>Target: 905.00</span>
+                </div>
+                <div class="signal-confidence">Confidence: 88%</div>
+            </div>
+            {% endfor %}
+        </div>
+        <button class="btn btn-secondary btn-block">LOAD HISTORY</button>
+    </div>
+    
+    <!-- Live Patterns -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h3>Live Patterns</h3>
+            <button class="btn btn-link">VIEW ALL</button>
+        </div>
+        <div class="pattern-list">
+            <div class="pattern-item">
+                <div class="pattern-icon">🚩</div>
+                <div class="pattern-info">
+                    <div class="pattern-name">Bull Flag</div>
+                    <div class="pattern-asset">SOL/USD • 15m</div>
+                </div>
+                <div class="pattern-confidence high">High Conf.</div>
+                <div class="pattern-match">92% Match</div>
+            </div>
+            <div class="pattern-item">
+                <div class="pattern-icon">📊</div>
+                <div class="pattern-info">
+                    <div class="pattern-name">Head & Shoulders</div>
+                    <div class="pattern-asset">EUR/USD • 1H</div>
+                </div>
+                <div class="pattern-confidence medium">Med Conf.</div>
+                <div class="pattern-match">68% Match</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Market Sentiment -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h3>Market Sentiment</h3>
+            <span class="info-icon">ℹ️</span>
+        </div>
+        <div class="sentiment-gauge">
+            <div class="gauge-container">
+                <canvas id="sentimentGauge"></canvas>
+                <div class="gauge-center">
+                    <div class="gauge-score">{% if sentiment %}{{ sentiment.score }}{% else %}72{% endif %}</div>
+                    <div class="gauge-label">{% if sentiment %}{{ sentiment.get_level_display|upper }}{% else %}GREED{% endif %}</div>
+                </div>
+            </div>
+            <div class="sentiment-scale">
+                <span>Extreme Fear</span>
+                <span>Neutral</span>
+                <span>Extreme Greed</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Update last update time
+    let updateCount = 0;
+    setInterval(() => {
+        updateCount += 2;
+        document.getElementById('last-update').textContent = updateCount + 's ago';
+    }, 2000);
+    
+    // BTC Chart
+    const ctx = document.getElementById('btcChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'],
+                datasets: [{
+                    label: 'Price',
+                    data: [68000, 68200, 68400, 68600, 68800, 69000, 69200, 69400],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#9ca3af' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#9ca3af' }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+

@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pattern Detection - MarketFlow{% endblock %}
+
+{% block content %}
+<div class="patterns-container">
+    <div class="patterns-sidebar">
+        <h2>Pattern Config</h2>
+        <p class="sidebar-subtitle">Configure detection algorithms</p>
+        
+        <div class="config-section">
+            <h3>DETECTION MODES</h3>
+            <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-label">Auto-detect Triangles</span>
+            </label>
+            <label class="toggle">
+                <input type="checkbox">
+                <span class="toggle-label">Harmonic Patterns</span>
+            </label>
+            <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-label">Support/Resistance</span>
+            </label>
+        </div>
+        
+        <div class="config-section">
+            <h3>VISUAL OVERLAYS</h3>
+            <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-label">Trend Lines</span>
+            </label>
+            <label class="toggle">
+                <input type="checkbox">
+                <span class="toggle-label">Volume Profile</span>
+            </label>
+            <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-label">Prediction Path</span>
+            </label>
+        </div>
+    </div>
+    
+    <div class="patterns-main">
+        <div class="chart-header-bar">
+            <div class="asset-selector">
+                <select class="form-select">
+                    <option>BTC/USD</option>
+                    <option>ETH/USD</option>
+                    <option>SOL/USD</option>
+                </select>
+                <div class="asset-info">
+                    <span class="asset-name">Bitcoin</span>
+                    <span class="asset-price positive">$64,231.50</span>
+                    <span class="asset-change">+2.4%</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <input type="search" placeholder="Search indicator..." class="search-input">
+                <button class="btn btn-icon">🔔</button>
+                <button class="btn btn-primary">▶ Run Analysis</button>
+                <div class="user-avatar-small">JD</div>
+            </div>
+        </div>
+        
+        <div class="chart-container-full">
+            <canvas id="patternChart"></canvas>
+            <div class="chart-overlay">
+                <div class="pattern-label">
+                    <div class="pattern-badge">BULLISH FLAG DETECTED</div>
+                    <div class="pattern-info">
+                        <div>Pattern: Bull Flag</div>
+                        <div>Reliability: ████</div>
+                    </div>
+                </div>
+                <div class="target-label">
+                    <div class="target-circle">Target: $68,400</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timeframe-selector-bar">
+            <button class="timeframe-btn">15m</button>
+            <button class="timeframe-btn active">1H</button>
+            <button class="timeframe-btn">4H</button>
+            <button class="timeframe-btn">1D</button>
+        </div>
+    </div>
+    
+    <div class="patterns-alerts">
+        <div class="alerts-header">
+            <h3>Live Alerts</h3>
+            <div class="tabs">
+                <button class="tab active">Live Alerts</button>
+                <button class="tab">History</button>
+            </div>
+        </div>
+        
+        <div class="alerts-section">
+            <div class="section-label">JUST NOW</div>
+            {% for alert in just_now_alerts|slice:":2" %}
+            <div class="alert-item">
+                <div class="alert-icon pattern">📊</div>
+                <div class="alert-content">
+                    <div class="alert-title">{{ alert.get_alert_type_display }}</div>
+                    <div class="alert-message">{{ alert.message }}</div>
+                    <div class="alert-meta">{% if alert.asset %}{{ alert.asset.symbol }}{% else %}N/A{% endif %} • {{ alert.created_at|date:"g:i A" }}</div>
+                </div>
+                {% if alert.confidence %}
+                <div class="alert-confidence">{{ alert.confidence }}% Match</div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="alert-item">
+                <div class="alert-icon pattern">📊</div>
+                <div class="alert-content">
+                    <div class="alert-title">Bullish Flag</div>
+                    <div class="alert-message">92% Match. Confirmed on 1H timeframe. Breakout imminent.</div>
+                    <div class="alert-meta">BTC/USD • 10:42 AM</div>
+                </div>
+                <div class="alert-confidence">92% Match</div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="alerts-section">
+            <div class="section-label">EARLIER</div>
+            {% for alert in earlier_alerts|slice:":2" %}
+            <div class="alert-item">
+                <div class="alert-icon {{ alert.alert_type }}">⚠️</div>
+                <div class="alert-content">
+                    <div class="alert-title">{{ alert.get_alert_type_display }}</div>
+                    <div class="alert-message">{{ alert.message }}</div>
+                    <div class="alert-meta">{% if alert.asset %}{{ alert.asset.symbol }}{% else %}N/A{% endif %} • {{ alert.created_at|date:"g:i A" }}</div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert-item">
+                <div class="alert-icon rsi">⚠️</div>
+                <div class="alert-content">
+                    <div class="alert-title">RSI Overbought</div>
+                    <div class="alert-message">RSI crossed 75.0 threshold.</div>
+                    <div class="alert-meta">SOL/USD • 09:15 AM</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <button class="btn btn-secondary btn-block">View All Activity →</button>
+    </div>
+</div>
+
+<div class="footer-bar">
+    <div class="footer-left">
+        <span class="status-indicator">●</span>
+        <span>Connected</span>
+        <span class="footer-meta">Latency: 24ms</span>
+    </div>
+    <div class="footer-right">
+        <span>Market: OPEN</span>
+        <span class="footer-meta">Last Sync: <span id="last-sync">10:42:15 AM</span></span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Wait for Chart.js to load
+    document.addEventListener('DOMContentLoaded', function() {
+        const patternCtx = document.getElementById('patternChart');
+        if (patternCtx && typeof Chart !== 'undefined') {
+            try {
+                new Chart(patternCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'],
+                        datasets: [{
+                            label: 'Price',
+                            data: [64000, 64200, 64300, 64100, 64200, 64300, 64400],
+                            borderColor: '#ffffff',
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { color: '#9ca3af' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#9ca3af' }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating pattern chart:', error);
+            }
+        } else if (patternCtx && typeof Chart === 'undefined') {
+            console.error('Chart.js is not loaded');
+        }
+        
+        // Update last sync time
+        const lastSyncEl = document.getElementById('last-sync');
+        if (lastSyncEl) {
+            setInterval(() => {
+                const now = new Date();
+                lastSyncEl.textContent = now.toLocaleTimeString();
+            }, 1000);
+        }
+    });
+</script>
+{% endblock %}
+

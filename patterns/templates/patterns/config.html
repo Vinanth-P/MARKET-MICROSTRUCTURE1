@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pattern Configuration{% endblock %}
+
+{% block content %}
+<div class="config-page">
+    <div class="page-header">
+        <h1>Pattern Detection Configuration</h1>
+        <p>Configure pattern detection algorithms and parameters</p>
+    </div>
+    
+    <div class="config-content">
+        <div class="config-card">
+            <h2>Detection Settings</h2>
+            <p>Configure which patterns to detect and sensitivity levels</p>
+            
+            <div class="form-section">
+                <label>Pattern Types</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" checked> Bull Flag</label>
+                    <label><input type="checkbox" checked> Head & Shoulders</label>
+                    <label><input type="checkbox" checked> Double Top/Bottom</label>
+                    <label><input type="checkbox"> Elliott Waves</label>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <label>Detection Sensitivity</label>
+                <input type="range" min="1" max="10" value="7" class="slider">
+                <div class="slider-labels">
+                    <span>Low</span>
+                    <span>High</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

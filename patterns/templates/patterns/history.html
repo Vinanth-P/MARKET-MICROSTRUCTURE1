@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pattern History - Predictive Markets{% endblock %}
+
+{% block content %}
+<div class="patterns-history-container">
+    <div class="history-sidebar">
+        <h2>Identified Patterns</h2>
+        <input type="search" placeholder="Search patterns..." class="search-input">
+        
+        <div class="pattern-list-sidebar">
+            {% for pattern in patterns|slice:":10" %}
+            <div class="pattern-list-item">
+                <div class="pattern-list-name">{{ pattern.get_pattern_type_display }}</div>
+                <div class="pattern-list-meta">
+                    <span>{{ pattern.detected_at|date:"M d, Y" }}</span>
+                    <span>Confidence: {{ pattern.confidence }}%</span>
+                </div>
+                <div class="pattern-status {{ pattern.status }}">{{ pattern.status|upper }}</div>
+            </div>
+            {% empty %}
+            <div class="empty-state">No patterns detected yet</div>
+            {% endfor %}
+        </div>
+        
+        <button class="btn btn-primary btn-block">+ New Analysis</button>
+    </div>
+    
+    <div class="history-main">
+        <div class="page-header">
+            <div>
+                <h1>Historical Pattern Analysis: BTC/USD</h1>
+                <p>Reviewing prediction accuracy against actual market movements for Q1 2023</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary">📥 Export Report</button>
+                <button class="btn btn-primary">▶ Run Backtest</button>
+            </div>
+        </div>
+        
+        <div class="history-controls">
+            <div class="control-group">
+                <label>ASSET CLASS</label>
+                <select class="form-select">
+                    <option>BTC/USD - Bitcoin</option>
+                    <option>ETH/USD - Ethereum</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>TIMEFRAME</label>
+                <div class="timeframe-selector">
+                    <button class="timeframe-btn">1H</button>
+                    <button class="timeframe-btn">4H</button>
+                    <button class="timeframe-btn active">1D</button>
+                    <button class="timeframe-btn">1W</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="toggle-label">
+                    <input type="checkbox" checked> Show Predictions
+                </label>
+                <label class="toggle-label">
+                    <input type="checkbox" checked> Show Error Cloud
+                </label>
+            </div>
+        </div>
+        
+        <div class="history-chart-section">
+            <div class="chart-legend">
+                <span class="legend-item"><span class="legend-dot prediction"></span> Prediction Model</span>
+                <span class="legend-item"><span class="legend-dot actual"></span> Actual Price</span>
+                <span class="legend-item"><span class="legend-dot breakout"></span> Breakout Point</span>
+            </div>
+            <div class="chart-container-large">
+                <canvas id="historyChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="history-stats">
+            <div class="stat-card">
+                <div class="stat-icon">🧠</div>
+                <div class="stat-content">
+                    <div class="stat-label">PREDICTION ACCURACY</div>
+                    <div class="stat-value">{{ accuracy|floatformat:1 }}%</div>
+                    <div class="stat-change positive">+2.1% vs last month</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-content">
+                    <div class="stat-label">POTENTIAL ROI</div>
+                    <div class="stat-value positive">+12.4%</div>
+                    <div class="stat-change">If patterns followed</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📉</div>
+                <div class="stat-content">
+                    <div class="stat-label">MAX DRAWDOWN</div>
+                    <div class="stat-value negative">-4.2%</div>
+                    <div class="stat-change">During Mar '23 dip</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">Σ</div>
+                <div class="stat-content">
+                    <div class="stat-label">R-SQUARED</div>
+                    <div class="stat-value">0.92</div>
+                    <div class="stat-change positive">High Correlation</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const historyCtx = document.getElementById('historyChart');
+    if (historyCtx) {
+        new Chart(historyCtx, {
+            type: 'line',
+            data: {
+                labels: ['May 23', 'Jun 23', 'Jul 23', 'Aug 23', 'Sep 23', 'Oct 23'],
+                datasets: [{
+                    label: 'Prediction Model',
+                    data: [41000, 41200, 41500, 41800, 42000, 42200],
+                    borderColor: '#3b82f6',
+                    borderDash: [5, 5],
+                    tension: 0.4
+                }, {
+                    label: 'Actual Price',
+                    data: [40950, 41150, 41450, 41750, 41950, 42150],
+                    borderColor: '#9ca3af',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#9ca3af' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#9ca3af' }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+

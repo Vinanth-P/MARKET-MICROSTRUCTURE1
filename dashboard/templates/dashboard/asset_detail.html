@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ asset.name }} - Market Overview{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-left">
+        <h1>{{ asset.name }}</h1>
+        <p class="subtitle">{{ asset.symbol }} • {{ asset.exchange }}</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary">Add Asset</button>
+    </div>
+</div>
+
+<div class="asset-detail-container">
+    <div class="asset-price-card">
+        <div class="current-price">
+            <span class="price-label">Current Price</span>
+            <span class="price-value">${{ asset.current_price|floatformat:2 }}</span>
+            <span class="price-change {% if asset.change_24h >= 0 %}positive{% else %}negative{% endif %}">
+                {{ asset.change_24h|floatformat:2 }}% (24h)
+            </span>
+        </div>
+        <div class="volume-info">
+            <span>Volume: ${{ asset.volume_24h|floatformat:0 }}</span>
+        </div>
+    </div>
+    
+    <div class="chart-section">
+        <div class="chart-header">
+            <h3>Price Chart</h3>
+            <div class="timeframe-selector">
+                <button class="timeframe-btn">15m</button>
+                <button class="timeframe-btn active">1H</button>
+                <button class="timeframe-btn">4H</button>
+                <button class="timeframe-btn">1D</button>
+            </div>
+        </div>
+        <div class="chart-container-large">
+            <canvas id="priceChart"></canvas>
+        </div>
+    </div>
+    
+    {% if forecast %}
+    <div class="forecast-section">
+        <h3>AI Prediction</h3>
+        <div class="forecast-info">
+            <div class="forecast-item">
+                <span class="forecast-label">Predicted High</span>
+                <span class="forecast-value">${{ forecast.predicted_high|floatformat:2 }}</span>
+            </div>
+            <div class="forecast-item">
+                <span class="forecast-label">Predicted Low</span>
+                <span class="forecast-value">${{ forecast.predicted_low|floatformat:2 }}</span>
+            </div>
+            <div class="forecast-item">
+                <span class="forecast-label">Confidence</span>
+                <span class="forecast-value">{{ forecast.confidence_score }}%</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const priceCtx = document.getElementById('priceChart');
+    if (priceCtx) {
+        const priceData = [
+            {% for data in price_data %}
+            {x: '{{ data.timestamp|date:"H:i" }}', y: {{ data.price }}},
+            {% endfor %}
+        ];
+        
+        new Chart(priceCtx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'Price',
+                    data: priceData.length > 0 ? priceData : [
+                        {x: '10:00', y: 68000},
+                        {x: '12:00', y: 68500},
+                        {x: '14:00', y: 69000},
+                        {x: '16:00', y: 69200},
+                    ],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        ticks: { color: '#9ca3af' }
+                    },
+                    x: {
+                        type: 'category',
+                        grid: { display: false },
+                        ticks: { color: '#9ca3af' }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+
