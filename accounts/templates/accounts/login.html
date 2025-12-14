@@ -1,40 +1,43 @@
 {% extends 'base.html' %}
-
-{% block title %}Login - Market Microstructure{% endblock %}
+{% load static %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+{% block title %}Login - FutureSight AI{% endblock %}
 
 {% block auth_content %}
 <div class="auth-container">
-    <div class="auth-card">
-        <div class="auth-header">
+    <div class="auth-card auth-card-dark">  <div class="auth-header">
             <div class="logo">
-                <div class="logo-icon">FS</div>
-                <span>FutureSight</span>
+                <div class="logo-icon logo-glow">FS</div>  <span>FutureSight</span>
             </div>
-            <h1>Welcome Back</h1>
-            <p>Sign in to access your dashboard</p>
+            <h1>WELCOME BACK</h1>
         </div>
-        <form method="post" class="auth-form">
+        
+        <form method="post" class="auth-form" autocomplete="on" novalidate>
             {% csrf_token %}
+            
             {% if messages %}
+                {# Ensure this message block is where you want error/success messages to appear #}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
+            
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" required autofocus>
+                <input type="text" id="username" name="username" required autofocus autocomplete="off" class="input-dark">
             </div>
+            
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required autocomplete="off" class="input-dark">
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
-            <div class="auth-footer">
-                <p>Don't have an account? <a href="{% url 'accounts:register' %}">Sign up</a></p>
+            
+            <button type="submit" class="btn btn-primary btn-block btn-matrix">Sign In</button> <div class="auth-footer">
+                <p>Don't have an account? <a href="{% url 'accounts:register' %}" class="link-glow">Sign up</a></p>
             </div>
         </form>
     </div>
 </div>
 {% endblock %}
-
-

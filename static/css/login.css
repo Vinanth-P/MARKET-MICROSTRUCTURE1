@@ -1,0 +1,268 @@
+/* Auth Pages */
+/* Update the existing auth-container rule in login.css */
+.auth-container {
+    /* Existing Styles */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--bg-primary); 
+    position: relative; 
+    overflow: hidden;
+    
+    /* ADDITIONS FOR IMAGE BACKGROUND */
+    background-image: url('../img/trading_background.jpg'); /* Path to your image */
+    background-size: 120% 125%; /* Ensures the image covers the entire container */
+    background-position: center 92%; /* Centers the graphic */
+    background-repeat: no-repeat;
+}
+/* Dark Overlay for Readability */
+.auth-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Dark translucent color (adjust opacity for desired darkness) */
+    background-color: rgba(0, 0, 0, 0.1); 
+    z-index: 1; /* Place it above the background image */
+}
+/* Update the existing auth-card with frosted glass and glow */
+.auth-card {
+    /* ... existing styles ... */
+    width: 100%;
+    max-width: 450px; 
+    
+    /* 🔴 CRITICAL CHANGE: Set background to near-total transparency */
+    background-color: rgba(26, 31, 46, 0.05); /* 5% opacity - almost invisible */
+    
+    /* Keep the small blur for the frosted effect */
+    backdrop-filter: blur(0px); 
+    -webkit-backdrop-filter: blur(0px); 
+    
+    /* 💡 Ensure the border is visible to outline the box */
+    border: 0px solid rgba(100, 110, 150, 0.5); /* Slightly brighter, semi-transparent border */
+    
+    border-radius: 8px;
+    padding: 2rem;
+    
+    /* Keep the subtle glow shadow */
+    box-shadow: 0 0 0px rgba(59, 130, 246, 0.2); 
+    transition: box-shadow 0.3s ease;
+    z-index: 2; 
+    position: relative; 
+}
+/* NEW RULE: Style for the merged, glowing submit button */
+/* Find and replace the existing .auth-card button[type="submit"] rule */
+.auth-card button[type="submit"] {
+    background: transparent; 
+    
+    /* 🔴 CHANGE: Use Green for the outline */
+    border: 2px solid #00FF8C; 
+    color: #00FF8C; /* Green text */
+    
+    font-size: 1.3rem; 
+    font-weight: 600;
+    padding: 0.5rem 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    
+    /* 🔴 CHANGE: Dual-color Red/Green glow */
+    box-shadow: 
+        0 0 10px rgba(0, 255, 140, 0.4), /* Green glow */
+        0 0 5px rgba(255, 51, 102, 0.3); /* Red secondary glow */
+    
+    transition: all 0.3s ease;
+}
+
+/* Update Hover Effect */
+.auth-card button[type="submit"]:hover {
+    background-color: rgba(0, 255, 140, 0.1); /* Subtle Green background on hover */
+    /* 🔴 CHANGE: Stronger Green/Red glow on hover */
+    box-shadow: 
+        0 0 20px rgba(0, 255, 140, 0.8), 
+        0 0 10px rgba(255, 51, 102, 0.5); 
+}
+.auth-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+/* NEW RULE for the main heading text (e.g., "Welcome Back" or "Login") */
+.auth-header h1 {
+    font-size: 2.5rem;
+    font-weight: 900; /* Bolder text shows the gradient better */
+    margin: 1rem 0 0.5rem;
+    
+    /* 🔴 Gradient Style: Matching the logo's red/green */
+    background: linear-gradient(
+        90deg, 
+        #00FF8C,    /* Bright Green */
+        #FF3366     /* Bright Red */
+    );
+    
+    /* Apply compatibility clipping/color properties */
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent; 
+    background-clip: text;
+    color: transparent;
+    
+    /* Add a subtle shadow for pop/glow */
+    text-shadow: 
+        2px 2px 0 rgba(0, 0, 0, 0),   /* Small, dark shadow for contrast */
+}
+.auth-header .logo {
+    display: flex; /* Use flexbox to align icon and text horizontally */
+    align-items: center; /* Vertically center the icon and text */
+    justify-content: center; /* Center the whole logo block horizontally */
+    gap: 10px; /* Space between the icon and the text */
+    margin-bottom: 1rem; /* Add some space below the logo before the H1 */
+    font-size: 4rem;
+   background: linear-gradient(
+        45deg, 
+        #00FF8C,       
+        #FF3366     
+    );
+    
+    /* ✅ REQUIRED FOR COMPATIBILITY: */
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent; 
+    background-clip: text; 
+    color: transparent;
+    
+    /* The W3C standard properties (if browsers ever fully adopted them without prefix): */
+    /* background-clip: text; */
+    /* text-fill-color: transparent; */
+    
+    text-shadow: 0 0 15px rgba(59, 130, 246, 0.7);
+    
+    /* Stronger, more focused blue glow to match the system's aesthetic */
+    text-shadow: 0 0 15px rgba(80, 150, 0, 0.1);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    /* 🔴 CHANGE: Use margin for spacing instead of gap */
+    gap: 0; /* Set gap to 0 */
+    margin-bottom: 1.5rem; /* Add space below the entire group */
+}
+
+.form-group label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 2px; /* Add slight margin below label */
+}
+
+/* Find and replace the existing .form-group input rule */
+/* Find and update the existing .form-group input rule */
+.form-group input,
+.form-select,
+.form-group select {
+    background: transparent;
+    border: none;
+    outline: none;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+    padding: 0 0 8px 0;
+    
+    /* 🔴 CRITICAL: Set the typed input text color to solid white for max contrast */
+    color: #FFFFFF; 
+    
+    font-size: 1.5rem; 
+    border-radius: 0; 
+    transition: border-bottom-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Find and replace the existing .form-group input:focus rule */
+.form-group input:focus,
+.form-select:focus {
+    outline: none;
+    /* 🔴 CHANGE: Use Green for the focus line and glow */
+    border-bottom-color: #00FF8C; /* Green focus line */
+    box-shadow: 0 1px 0 0 #00FF8C, /* Green line above the border */
+                0 0 10px rgba(0, 255, 140, 0.4); /* Subtle Green glow around the line */
+}
+
+/* Find and replace the existing .auth-footer rule */
+.auth-footer {
+    text-align: center;
+    margin-top: 0.5rem; /* Give it more space */
+    
+    /* 🔴 MERGING: Use subtle text color */
+    color: rgba(255, 255, 255, 0.7); 
+    
+    /* 🔴 Increase Font Size */
+    font-size: 1.1rem; 
+}
+
+.auth-footer a { 
+    /* 🔴 CHANGE: Use Red for the link color */
+    color: #FF3366; 
+    text-decoration: none;
+    
+    /* 🔴 CHANGE: Use Red glow */
+    text-shadow: 0 0 8px rgba(255, 51, 102, 0.7); 
+    transition: all 0.2s;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+.logo-icon {
+    /* Override global logo styles for the auth page focus */
+    width: 70px; 
+    height: 60px; 
+    font-size: 40px;
+    background: none !important;
+    border: 4px solid var(--accent-blue);
+    color: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.6), inset 0 0 5px rgba(59, 130, 246, 0.3);
+   border: none; 
+    
+    color: #FFFFFF; 
+    border-radius: 8px; 
+  background: linear-gradient(
+        90deg, 
+        #00FF8C,    
+        #FF3366     
+    );
+    
+    /* Required for WebKit compatibility: */
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent; 
+    
+    /* ✅ NEW: Standard properties for future support and to clear the warning */
+    background-clip: text; /* Standard W3C property */
+    color: transparent; /* Standard property for text-fill-color */
+    /* 🔴 CRITICAL CHANGE 2: Create a thick, two-layer shadow for the Red/Green border look */
+    box-shadow: 
+        /* Outer Red Glow (Bottom/Right edge) */
+        3px 3px 7px 5px #FF3366,   /* Red offset shadow: 3px right, 3px down */
+        
+        /* Outer Green Glow (Top/Left edge) */
+        -3px -3px 7px 5px #00FF8C,  /* Green offset shadow: 3px left, 3px up */
+        
+        /* A very subtle inner glow for depth (optional) */
+        inset 0 0 5px rgba(0, 0, 0, 0.5); 
+        
+    transition: all 0.3s ease;
+}
+
+/* Find and update the existing .auth-footer a rule */
+.auth-footer a { 
+    /* 🔴 CHANGE: Use Green for the link color */
+    color: #00FF8C; 
+    text-decoration: none;
+    
+    /* 🔴 CHANGE: Use Green glow */
+    text-shadow: 0 0 8px rgba(0, 255, 140, 0.7); 
+    transition: all 0.2s;
+}

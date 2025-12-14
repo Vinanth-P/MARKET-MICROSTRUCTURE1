@@ -26,8 +26,11 @@
             <span class="info-label">Usage:</span>
             <span class="info-value">{{ user.profile.usage_percentage|floatformat:0 }}%</span>
         </div>
-        <a href="{% url 'accounts:logout' %}" class="btn btn-secondary">Logout</a>
-    </div>
+    <form action="{% url 'accounts:logout' %}" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary">Logout</button>
+    </form>
+</div>
 </div>
 {% endblock %}
 
