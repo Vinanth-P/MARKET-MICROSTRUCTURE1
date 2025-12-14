@@ -43,9 +43,10 @@
                     <div class="user-info">
                         <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
                         <div class="user-plan">{% if user.profile %}{{ user.profile.plan|title }} Plan{% else %}Free Plan{% endif %}</div>
-                        <div class="usage-bar">
-                            <div class="usage-fill" style="width: {% if user.profile %}{{ user.profile.usage_percentage }}{% else %}0{% endif %}%"></div>
-                        </div>
+                                <div class="usage-bar">
+                                    <div class="usage-fill" data-usage="{{ user.profile.usage_percentage|default_if_none:0 }}"></div>
+
+                                </div>
                         <div class="usage-text">{% if user.profile %}{{ user.profile.usage_percentage|floatformat:0 }}{% else %}0{% endif %}% Usage</div>
                     </div>
                 </div>

@@ -67,14 +67,28 @@
 
 {% block extra_js %}
 <script>
+    // Build price data from Django template
+    const priceDataRaw = `
+        {% for data in price_data %}
+        {"x": "{{ data.timestamp|date:"H:i" }}", "y": {{ data.price }}}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    `;
+    
+    let priceData = [];
+    try {
+        const jsonStr = '[' + priceDataRaw.replace(/\s+/g, ' ').trim() + ']';
+        priceData = JSON.parse(jsonStr);
+    } catch (e) {
+        priceData = [
+            {x: '10:00', y: 68000},
+            {x: '12:00', y: 68500},
+            {x: '14:00', y: 69000},
+            {x: '16:00', y: 69200}
+        ];
+    }
+    
     const priceCtx = document.getElementById('priceChart');
     if (priceCtx) {
-        const priceData = [
-            {% for data in price_data %}
-            {x: '{{ data.timestamp|date:"H:i" }}', y: {{ data.price }}},
-            {% endfor %}
-        ];
-        
         new Chart(priceCtx, {
             type: 'line',
             data: {
@@ -84,7 +98,7 @@
                         {x: '10:00', y: 68000},
                         {x: '12:00', y: 68500},
                         {x: '14:00', y: 69000},
-                        {x: '16:00', y: 69200},
+                        {x: '16:00', y: 69200}
                     ],
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -95,18 +109,18 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: {display: false}
                 },
                 scales: {
                     y: {
                         beginAtZero: false,
-                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                        ticks: { color: '#9ca3af' }
+                        grid: {color: 'rgba(255, 255, 255, 0.1)'},
+                        ticks: {color: '#9ca3af'}
                     },
                     x: {
                         type: 'category',
-                        grid: { display: false },
-                        ticks: { color: '#9ca3af' }
+                        grid: {display: false},
+                        ticks: {color: '#9ca3af'}
                     }
                 }
             }

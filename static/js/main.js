@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize chart updates
     initChartUpdates();
+    
+    // Apply usage bar widths set from server-rendered data attributes
+    applyUsageWidths();
 });
 
 // Real-time data updates
@@ -162,6 +165,17 @@ function updateSentimentGauge(score) {
     ctx.lineWidth = 20;
     ctx.strokeStyle = score >= 50 ? '#10b981' : '#ef4444';
     ctx.stroke();
+}
+
+// Apply widths for elements with `.usage-fill` using their `data-usage` attribute
+function applyUsageWidths() {
+    document.querySelectorAll('.usage-fill').forEach(el => {
+        const usage = el.dataset.usage;
+        let val = parseFloat(usage);
+        if (isNaN(val)) val = 0;
+        val = Math.max(0, Math.min(100, val));
+        el.style.width = val + '%';
+    });
 }
 
 // Format time ago
