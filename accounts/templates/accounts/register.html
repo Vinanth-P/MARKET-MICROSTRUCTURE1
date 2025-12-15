@@ -1,20 +1,23 @@
 {% extends 'base.html' %}
-
+{% load static %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
 {% block title %}Register - FutureSight{% endblock %}
 
 {% block auth_content %}
+<body class="register-page">
 <div class="auth-container">
-    <div class="auth-card">
+    <div class="auth-card"> 
         <div class="auth-header">
             <div class="logo">
                 <div class="logo-icon">FS</div>
                 <span>FutureSight</span>
             </div>
-            <h1>Create Account</h1>
-            <p>Start analyzing markets today</p>
+            <h1>CREATE ACCOUNT</h1>
         </div>
         
-        <form method="post" class="auth-form" novalidate>
+        <form method="post" class="auth-form" novalidate autocomplete="off">
             {% csrf_token %}
             
             {# --- 1. Display Global Messages (e.g., success, info, general errors) --- #}
@@ -55,4 +58,5 @@
         </form>
     </div>
 </div>
+</body>
 {% endblock %}
