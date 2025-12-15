@@ -79,27 +79,26 @@
             </div>
         </div>
         
+        {% if latest_forecast %}
         <div class="forecast-cards">
             <div class="forecast-card">
                 <div class="card-label">Current Price</div>
-                <div class="card-value">$45,230.50</div>
-                <div class="card-change positive">+2.4% (24h)</div>
+                <div class="card-value">${{ latest_forecast.current_price|floatformat:2 }}</div>
+                <div class="card-change neutral">{{ latest_forecast.asset.symbol }}</div>
             </div>
             <div class="forecast-card">
-                <div class="card-label">Predicted High (7d)</div>
-                <div class="card-value">$48,100.00</div>
-                <div class="card-change positive">↑+6.3% upside</div>
+                <div class="card-label">Predicted High ({{ latest_forecast.prediction_horizon_days }}d)</div>
+                <div class="card-value">${{ latest_forecast.predicted_high|floatformat:2 }}</div>
             </div>
             <div class="forecast-card">
-                <div class="card-label">Predicted Low (7d)</div>
-                <div class="card-value">$44,800.00</div>
-                <div class="card-change negative">↓-0.9% downside</div>
+                <div class="card-label">Predicted Low ({{ latest_forecast.prediction_horizon_days }}d)</div>
+                <div class="card-value">${{ latest_forecast.predicted_low|floatformat:2 }}</div>
             </div>
             <div class="forecast-card">
                 <div class="card-label">Confidence Score</div>
-                <div class="card-value">87%</div>
+                <div class="card-value">{{ latest_forecast.confidence_score }}%</div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: 87%"></div>
+                    <div class="progress-fill" style="width: {{ latest_forecast.confidence_score }}%"></div>
                 </div>
             </div>
         </div>
@@ -116,7 +115,6 @@
                 </div>
             </div>
             <div class="chart-legend">
-                <span class="legend-item"><span class="legend-dot historical"></span> Historical</span>
                 <span class="legend-item"><span class="legend-dot predicted"></span> Predicted</span>
                 <span class="legend-item"><span class="legend-dot confidence"></span> Confidence Interval</span>
             </div>
@@ -124,6 +122,11 @@
                 <canvas id="forecastChart"></canvas>
             </div>
         </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No forecasts yet. Run a forecast to see results.</p>
+        </div>
+        {% endif %}
         
         <div class="forecast-info-grid">
             <div class="info-card">
@@ -197,29 +200,60 @@
     // Forecast Chart
     const forecastCtx = document.getElementById('forecastChart');
     if (forecastCtx) {
+        const labels = [
+            {% for point in latest_points %}
+            '{{ point.date|date:"M d" }}',
+            {% endfor %}
+        ].filter(l => l);
+
+        const predicted = [
+            {% for point in latest_points %}
+            {{ point.predicted_price }},
+            {% endfor %}
+        ].map(Number).filter(n => !Number.isNaN(n));
+
+        const upper = [
+            {% for point in latest_points %}
+            {{ point.confidence_upper }},
+            {% endfor %}
+        ].map(Number).filter(n => !Number.isNaN(n));
+
+        const lower = [
+            {% for point in latest_points %}
+            {{ point.confidence_lower }},
+            {% endfor %}
+        ].map(Number).filter(n => !Number.isNaN(n));
+
+        const hasData = labels.length > 0 && predicted.length > 0;
+
+        const fallbackLabels = ['Today'];
+        const fallbackData = [{{ latest_forecast.current_price|default_if_none:0 }}];
+
         new Chart(forecastCtx, {
             type: 'line',
             data: {
-                labels: ['Jan 01', 'Jan 05', 'Jan 10', 'Jan 15', 'Jan 20', 'Jan 25', 'Jan 30', 'Feb 05'],
+                labels: hasData ? labels : fallbackLabels,
                 datasets: [{
-                    label: 'Historical',
-                    data: [45000, 45200, 45400, 45600, 45800, null, null, null],
-                    borderColor: '#9ca3af',
-                    borderDash: [],
-                    tension: 0.4
-                }, {
                     label: 'Predicted',
-                    data: [null, null, null, null, 45800, 46200, 46500, 47000],
+                    data: hasData ? predicted : fallbackData,
                     borderColor: '#3b82f6',
                     borderDash: [5, 5],
-                    tension: 0.4
+                    tension: 0.4,
+                    fill: false
                 }, {
-                    label: 'Confidence Interval',
-                    data: [null, null, null, null, 45800, 46200, 46500, 47000],
+                    label: 'Confidence Upper',
+                    data: hasData ? upper : [],
                     borderColor: 'rgba(59, 130, 246, 0.2)',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    fill: '-1'
+                }, {
+                    label: 'Confidence Lower',
+                    data: hasData ? lower : [],
+                    borderColor: 'rgba(59, 130, 246, 0.0)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                    tension: 0.4,
+                    fill: '-1'
                 }]
             },
             options: {

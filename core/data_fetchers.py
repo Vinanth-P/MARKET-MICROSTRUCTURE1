@@ -1,6 +1,6 @@
 import requests
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 from decimal import Decimal
 from typing import Dict, List, Optional
 from django.utils import timezone
@@ -73,12 +73,46 @@ class CryptoDataFetcher:
             prices = []
             for price_point in data.get('prices', []):
                 prices.append({
-                    'timestamp': datetime.fromtimestamp(price_point[0] / 1000, tz=timezone.utc),
+                    'timestamp': datetime.fromtimestamp(price_point[0] / 1000, tz=dt_timezone.utc),
                     'price': Decimal(str(price_point[1]))
                 })
             return prices
         except Exception as e:
             print(f"Error fetching historical data for {symbol}: {e}")
+            return []
+
+    @staticmethod
+    def get_binance_klines(symbol: str, interval: str = '1d', limit: int = 500) -> List[Dict]:
+        """Fetch OHLCV candlesticks from Binance public API.
+
+        Returns list of dicts: {timestamp: datetime, open, high, low, close, volume}
+        """
+        try:
+            url = "https://api.binance.com/api/v3/klines"
+            params = {
+                'symbol': symbol,
+                'interval': interval,
+                'limit': limit
+            }
+            resp = requests.get(url, params=params, timeout=10)
+            resp.raise_for_status()
+            data = resp.json()
+
+            candles = []
+            for row in data:
+                # Binance kline format: [openTime, open, high, low, close, volume, closeTime, ...]
+                ts = datetime.fromtimestamp(row[0] / 1000, tz=dt_timezone.utc)
+                candles.append({
+                    'timestamp': ts,
+                    'open': Decimal(str(row[1])),
+                    'high': Decimal(str(row[2])),
+                    'low': Decimal(str(row[3])),
+                    'close': Decimal(str(row[4])),
+                    'volume': Decimal(str(row[5])),
+                })
+            return candles
+        except Exception as e:
+            print(f"Error fetching Binance klines for {symbol}: {e}")
             return []
 
 

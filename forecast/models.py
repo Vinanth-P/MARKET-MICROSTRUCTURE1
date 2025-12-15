@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from dashboard.models import Asset
+from django.utils import timezone
+
+
 
 
 class Forecast(models.Model):
@@ -76,3 +79,62 @@ class Pattern(models.Model):
     
     def __str__(self):
         return f"{self.get_pattern_type_display()} - {self.asset.symbol} ({self.match_percentage}%)"
+
+
+class BacktestRun(models.Model):
+    STATUS_CHOICES = [
+        ('queued', 'Queued'),
+        ('running', 'Running'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='backtests')
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, related_name='backtests')
+    symbol = models.CharField(max_length=32)
+    interval = models.CharField(max_length=8, default='1d')
+    short_window = models.IntegerField(default=10)
+    long_window = models.IntegerField(default=50)
+    initial_capital = models.DecimalField(max_digits=20, decimal_places=2, default=10000)
+    commission_pct = models.DecimalField(max_digits=6, decimal_places=4, default=0.001)
+    slippage = models.DecimalField(max_digits=6, decimal_places=4, default=0.0005)
+    start_time = models.DateTimeField(null=True, blank=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default='queued')
+    metrics = models.JSONField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Backtest {self.symbol} ({self.short_window}/{self.long_window}) by {self.user.username}"
+
+
+class TradeLog(models.Model):
+    backtest = models.ForeignKey(BacktestRun, on_delete=models.CASCADE, related_name='trades')
+    timestamp = models.DateTimeField()
+    side = models.CharField(max_length=4, choices=[('buy', 'Buy'), ('sell', 'Sell')])
+    price = models.DecimalField(max_digits=20, decimal_places=8)
+    size = models.DecimalField(max_digits=20, decimal_places=8)
+    pnl = models.DecimalField(max_digits=20, decimal_places=8, null=True, blank=True)
+    note = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"{self.side.upper()} {self.backtest.symbol} @ {self.price} on {self.timestamp}"
+
+
+class EquityPoint(models.Model):
+    backtest = models.ForeignKey(BacktestRun, on_delete=models.CASCADE, related_name='equity_points')
+    timestamp = models.DateTimeField()
+    equity = models.DecimalField(max_digits=20, decimal_places=2)
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"{self.backtest.symbol} equity {self.equity} @ {self.timestamp}"

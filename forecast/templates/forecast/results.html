@@ -24,12 +24,10 @@
     <div class="forecast-card">
         <div class="card-label">Predicted High ({{ forecast.prediction_horizon_days }}d)</div>
         <div class="card-value">${{ forecast.predicted_high|floatformat:2 }}</div>
-        <div class="card-change positive">↑+{{ forecast.predicted_high|floatformat:2 }} upside</div>
     </div>
     <div class="forecast-card">
         <div class="card-label">Predicted Low ({{ forecast.prediction_horizon_days }}d)</div>
         <div class="card-value">${{ forecast.predicted_low|floatformat:2 }}</div>
-        <div class="card-change negative">↓-{{ forecast.predicted_low|floatformat:2 }} downside</div>
     </div>
     <div class="forecast-card">
         <div class="card-label">Confidence Score</div>
@@ -49,8 +47,19 @@
             <button class="timeframe-btn active">1M</button>
         </div>
     </div>
+    <div class="chart-controls">
+        <label>Symbol: <input id="bt_symbol" type="text" value="BTCUSDT"></label>
+        <label>Interval: <select id="bt_interval"><option value="1d">1d</option><option value="4h">4h</option><option value="1h">1h</option></select></label>
+        <label>Short MA: <input id="bt_short" type="number" value="10" min="1"></label>
+        <label>Long MA: <input id="bt_long" type="number" value="50" min="1"></label>
+        <label>Forecast Days: <input id="bt_forecast_days" type="number" value="5" min="1"></label>
+        <label>Initial Capital: <input id="bt_capital" type="number" value="10000" min="0"></label>
+        <label>Save Run: <input id="bt_save" type="checkbox"></label>
+        <button id="bt_run" class="btn btn-primary">Run Backtest</button>
+    </div>
     <div class="chart-container-large">
-        <canvas id="forecastChart"></canvas>
+        <div id="pricePlot" style="width:100%;height:420px;"></div>
+        <div id="equityPlot" style="width:100%;height:240px;margin-top:12px;"></div>
     </div>
 </div>
 
@@ -72,52 +81,9 @@
 </div>
 {% endif %}
 {% endblock %}
-
 {% block extra_js %}
-<script>
-    const forecastCtx = document.getElementById('forecastChart');
-    if (forecastCtx) {
-        const forecastData = [
-            {% for point in forecast_points %}
-            {x: '{{ point.date|date:"M d" }}', y: {{ point.predicted_price }}},
-            {% endfor %}
-        ];
-        
-        new Chart(forecastCtx, {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: 'Predicted',
-                    data: forecastData.length > 0 ? forecastData : [{x: 'Today', y: {{ forecast.current_price }}}],
-                    borderColor: '#3b82f6',
-                    borderDash: [5, 5],
-                    tension: 0.4,
-                    fill: true,
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                        ticks: { color: '#9ca3af' }
-                    },
-                    x: {
-                        type: 'category',
-                        grid: { display: false },
-                        ticks: { color: '#9ca3af' }
-                    }
-                }
-            }
-        });
-    }
-</script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <script src="{% static 'forecast/js/forecast.js' %}"></script>
 {% endblock %}
 
 

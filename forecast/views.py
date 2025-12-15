@@ -5,7 +5,11 @@ from django.utils import timezone
 from .models import Forecast, ForecastPoint, Pattern
 from dashboard.models import Asset
 from core.data_fetchers import CryptoDataFetcher
-from core.prediction_engine import PredictionEngine
+from core.ml_baseline import MLForecastBaseline
+try:
+    from core.better_ml import BetterMLForecast
+except Exception:
+    BetterMLForecast = None
 from datetime import datetime, timedelta
 
 
@@ -14,10 +18,14 @@ def index(request):
     """Forecast configuration and results view"""
     assets = Asset.objects.all()[:10]
     recent_forecasts = Forecast.objects.filter(user=request.user).order_by('-created_at')[:5]
+    latest_forecast = recent_forecasts.first() if recent_forecasts else None
+    latest_points = latest_forecast.points.all().order_by('date') if latest_forecast else []
     
     context = {
         'assets': assets,
         'recent_forecasts': recent_forecasts,
+        'latest_forecast': latest_forecast,
+        'latest_points': latest_points,
     }
     return render(request, 'forecast/index.html', context)
 
@@ -58,14 +66,18 @@ def run_forecast(request):
             prices = [float(p['price']) for p in historical]
             timestamps = [p['timestamp'] for p in historical]
         
-        # Generate prediction
-        engine = PredictionEngine(prices, timestamps)
-        prediction = engine.predict(
-            horizon_days=horizon_days,
-            use_rsi=rsi_divergence,
-            use_macd=macd_crossover,
-            use_sentiment=sentiment_analysis
-        )
+        # Prefer improved ML model if available; fallback to baseline
+        prediction = None
+        if BetterMLForecast:
+            try:
+                better = BetterMLForecast(prices, timestamps)
+                prediction = better.predict(horizon_days=horizon_days)
+            except Exception:
+                prediction = None
+
+        if prediction is None:
+            baseline = MLForecastBaseline(prices, timestamps)
+            prediction = baseline.predict(horizon_days=horizon_days)
         
         # Create forecast
         forecast = Forecast.objects.create(
