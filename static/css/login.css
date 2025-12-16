@@ -190,6 +190,38 @@
     box-shadow: 0 1px 0 0 #00FF8C, /* Green line above the border */
                 0 0 10px rgba(0, 255, 140, 0.4); /* Subtle Green glow around the line */
 }
+/* =========================
+   ERROR MESSAGES FOR LOGIN
+   ========================= */
+
+/* General error messages (Django messages or alert divs) */
+.auth-card .alert.alert-error,
+.auth-card .alert.alert-danger {
+    color: #FF3366; /* Bright red text */
+    background-color: rgba(255, 51, 102, 0.05); /* Slight red tint behind text */
+    border: 1px solid rgba(255, 51, 102, 0.3);
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    text-shadow: 0 0 5px rgba(255, 51, 102, 0.4); /* Glow for dark background */
+}
+
+/* Individual field error messages (if you use something like form.errors) */
+.auth-card .error-message {
+    color: #FF3366; /* Red text */
+    font-size: 0.85rem;
+    margin-top: 3px;
+    text-shadow: 0 0 5px rgba(255, 51, 102, 0.4);
+}
+
+/* Highlight input fields with errors */
+.form-group.error input,
+.form-group.error select {
+    border-bottom-color: #FF3366; /* Red underline */
+    box-shadow: 0 1px 0 0 #FF3366, 0 0 8px rgba(255, 51, 102, 0.4); /* Subtle glow */
+}
+
 
 /* Find and replace the existing .auth-footer rule */
 .auth-footer {

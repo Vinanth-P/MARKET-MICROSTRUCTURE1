@@ -16,23 +16,22 @@
         
         <form method="post" class="auth-form" autocomplete="on" novalidate>
             {% csrf_token %}
-            
-            {% if messages %}
-                {# Ensure this message block is where you want error/success messages to appear #}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-            
-            <div class="form-group">
+          <div class="form-group {% if form.username.errors %}error{% endif %}">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required autofocus autocomplete="off" class="input-dark">
+                {% for error in form.username.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
             </div>
-            
-            <div class="form-group">
+
+            <div class="form-group {% if form.password.errors %}error{% endif %}">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required autocomplete="off" class="input-dark">
+                {% for error in form.password.errors %}
+                    <div class="error-message">{{ error }}</div>
+                {% endfor %}
             </div>
+
             
             <button type="submit" class="btn btn-primary btn-block btn-matrix">Sign In</button> <div class="auth-footer">
                 <p>Don't have an account? <a href="{% url 'accounts:register' %}" class="link-glow">Sign up</a></p>

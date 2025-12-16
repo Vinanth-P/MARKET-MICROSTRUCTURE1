@@ -26,17 +26,26 @@ def register_view(request):
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard:overview')
-    
+
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        if not username or not password:
+            messages.error(request, "Username and password are required.")
+            return render(request, 'accounts/login.html')
+
         user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('dashboard:overview')
-        else:
-            messages.error(request, 'Invalid username or password.')
+
+        if user is None:
+            messages.error(request, "Invalid username or password.")
+            return render(request, 'accounts/login.html')
+
+        login(request, user)
+        return redirect('dashboard:overview')
+
     return render(request, 'accounts/login.html')
+
 
 
 @login_required
