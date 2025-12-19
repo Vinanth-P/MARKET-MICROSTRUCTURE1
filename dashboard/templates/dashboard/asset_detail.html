@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/main_dashboard.css' %}">
+{% endblock %}
 {% block title %}{{ asset.name }} - Market Overview{% endblock %}
 
 {% block content %}

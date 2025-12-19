@@ -1,0 +1,170 @@
+/* --- Global Theme & Variables --- */
+:root {
+    --bg-dark: #0a0b0d;
+    --card-bg: rgba(20, 23, 28, 0.75);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --accent-success: #00FF8C; /* Neon Green */
+    --accent-danger: #FF3366;  /* Neon Red */
+    --accent-blue: #3b82f6;
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --glass-effect: blur(12px);
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* --- Layout Containers --- */
+.dashboard-grid, .asset-detail-container, .forecast-container {
+    display: grid;
+    gap: 24px;
+    padding: 20px;
+}
+
+.dashboard-grid { grid-template-columns: 2fr 1fr; }
+.asset-detail-container { grid-template-columns: 1fr 350px; }
+.forecast-container { grid-template-columns: 320px 1fr; }
+
+/* --- Headers & Actions --- */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 20px;
+}
+
+.page-header h1 { font-size: 2rem; font-weight: 800; margin: 0; }
+.subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
+
+/* --- Glassmorphism Cards --- */
+.market-card, .dashboard-section, .asset-price-card, .forecast-card, .info-card, .forecast-history-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: var(--glass-effect);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.market-card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-4px); }
+
+/* --- Neon Data Display --- */
+.card-value, .price-value, .target-value, .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.positive { color: var(--accent-success) !important; text-shadow: 0 0 10px rgba(0, 255, 140, 0.3); }
+.negative { color: var(--accent-danger) !important; text-shadow: 0 0 10px rgba(255, 51, 102, 0.3); }
+
+/* --- Target Price (Bitcoin Details) --- */
+.target-price {
+    background: rgba(0, 255, 140, 0.03);
+    border-left: 4px solid var(--accent-success);
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.target-value { font-size: 2.5rem; color: var(--accent-success); }
+
+/* --- Form Elements (Forecast Index) --- */
+.form-section { margin-bottom: 24px; }
+.form-section label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary); }
+
+.form-select, input[type="text"], input[type="number"], select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    border-radius: 8px;
+    color: #fff;
+}
+
+/* Neon Range Sliders */
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--accent-success);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--accent-success);
+}
+
+/* --- Signal Feed & Pattern Items --- */
+.signal-item, .pattern-item, .pattern-item-detected {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid transparent;
+}
+
+.signal-item:hover { border-color: var(--border-color); }
+
+/* --- Progress Bars (Confidence) --- */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-success), #00cc70);
+    box-shadow: 0 0 10px var(--accent-success);
+}
+
+/* --- Buttons --- */
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary {
+    background: var(--accent-success);
+    color: #000;
+    box-shadow: 0 0 15px rgba(0, 255, 140, 0.3);
+}
+
+.btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid var(--border-color);
+}
+
+/* --- Backtest Controls (Results Page) --- */
+.chart-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}

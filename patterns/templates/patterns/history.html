@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/pattern.css' %}">
+{% endblock %}
 {% block title %}Pattern History - Predictive Markets{% endblock %}
 
 {% block content %}

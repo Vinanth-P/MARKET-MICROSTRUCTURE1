@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/forecast.css' %}">
+{% endblock %}
 {% block title %}Price Forecast - Predictr{% endblock %}
 
 {% block content %}
@@ -16,7 +18,9 @@
                 <select name="asset" class="form-select" required>
                     <option value="">Choose asset...</option>
                     {% for asset in assets %}
-                    <option value="{{ asset.symbol }}">{{ asset.name }} ({{ asset.symbol }})</option>
+                    <option value="{{ asset.symbol }}" {% if latest_forecast.asset.symbol == asset.symbol %}selected{% endif %}>
+                        {{ asset.name }} ({{ asset.symbol }})
+                    </option>
                     {% endfor %}
                 </select>
                 <div class="recent-assets">
@@ -28,9 +32,9 @@
             
             <div class="form-section">
                 <label>Prediction Horizon</label>
-                <input type="range" name="horizon" min="1" max="30" value="7" class="slider" id="horizon-slider">
+                <input type="range" name="horizon" min="1" max="30" value="{{ latest_forecast.prediction_horizon_days|default:7 }}" class="slider" id="horizon-slider">
                 <div class="slider-value">
-                    <span id="horizon-value">7 Days</span>
+                    <span id="horizon-value">{{ latest_forecast.prediction_horizon_days|default:7 }} Days</span>
                 </div>
             </div>
             
@@ -63,14 +67,18 @@
             <button type="submit" class="btn btn-primary btn-block">
                 <span>⚡</span> Run Prediction
             </button>
-            <button type="button" class="btn btn-secondary btn-block">Reset Parameters</button>
+            <button type="reset" class="btn btn-secondary btn-block">Reset Parameters</button>
         </form>
     </div>
     
     <div class="forecast-main">
         <div class="page-header">
             <div>
-                <h1>Bitcoin (BTC) Price Forecast</h1>
+                {% if latest_forecast %}
+                    <h1>{{ latest_forecast.asset.name }} ({{ latest_forecast.asset.symbol }}) Price Forecast</h1>
+                {% else %}
+                    <h1>Market Price Forecast</h1>
+                {% endif %}
                 <p>Model V4.2 • Updated 2 mins ago</p>
             </div>
             <div class="header-actions">
@@ -122,20 +130,13 @@
                 <canvas id="forecastChart"></canvas>
             </div>
         </div>
-        {% else %}
-        <div class="empty-state">
-            <p>No forecasts yet. Run a forecast to see results.</p>
-        </div>
-        {% endif %}
-        
+
         <div class="forecast-info-grid">
             <div class="info-card">
                 <h3>AI Market Summary</h3>
                 <p class="info-subtitle">Based on technical & sentiment analysis</p>
                 <p class="info-text">
-                    Our models indicate a strong <strong>Bullish</strong> trend continuation for Bitcoin over the next 7 days. 
-                    The confluence of increasing volume and a positive RSI divergence suggests a potential breakout above 
-                    the $47k resistance level. Sentiment analysis on social channels remains elevated.
+                    {{ latest_forecast.summary|default:"Our models are processing the trend data for this asset..." }}
                 </p>
                 <p class="info-meta">Processing time: 1.2s <a href="#">View detailed logs</a></p>
             </div>
@@ -151,49 +152,45 @@
                         </div>
                         <div class="pattern-match">92% Match</div>
                     </div>
-                    <div class="pattern-item-detected">
-                        <span class="pattern-icon">↗️</span>
-                        <div class="pattern-details">
-                            <div class="pattern-name">Golden Cross</div>
-                            <div class="pattern-timeframe">Daily Moving Average</div>
-                        </div>
-                        <div class="pattern-match">78% Match</div>
                     </div>
-                    <div class="pattern-item-detected">
-                        <span class="pattern-icon">💧</span>
-                        <div class="pattern-details">
-                            <div class="pattern-name">Volume Drop</div>
-                            <div class="pattern-timeframe">Weakening momentum</div>
-                        </div>
-                        <div class="pattern-match">45% Match</div>
-                    </div>
-                </div>
             </div>
         </div>
+        {% else %}
+        <div class="empty-state" style="text-align: center; padding: 50px;">
+            <p>No forecasts yet. Select an asset and run a forecast to see results.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
     // Slider updates
     const horizonSlider = document.getElementById('horizon-slider');
     const horizonValue = document.getElementById('horizon-value');
-    horizonSlider.addEventListener('input', (e) => {
-        horizonValue.textContent = e.target.value + ' Days';
-    });
+    if (horizonSlider) {
+        horizonSlider.addEventListener('input', (e) => {
+            horizonValue.textContent = e.target.value + ' Days';
+        });
+    }
     
     const riskSlider = document.getElementById('risk-slider');
     const riskValue = document.getElementById('risk-value');
     const riskLabels = ['Low', 'Medium', 'High'];
-    riskSlider.addEventListener('input', (e) => {
-        riskValue.textContent = riskLabels[e.target.value];
-    });
+    if (riskSlider) {
+        riskSlider.addEventListener('input', (e) => {
+            riskValue.textContent = riskLabels[e.target.value];
+        });
+    }
     
-    // Asset button clicks
+    // Asset button clicks - updates the select dropdown
     document.querySelectorAll('.asset-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelector('select[name="asset"]').value = btn.dataset.symbol;
+            const select = document.querySelector('select[name="asset"]');
+            select.value = btn.dataset.symbol;
         });
     });
     
@@ -204,30 +201,29 @@
             {% for point in latest_points %}
             '{{ point.date|date:"M d" }}',
             {% endfor %}
-        ].filter(l => l);
+        ].filter(l => l !== "");
 
         const predicted = [
             {% for point in latest_points %}
-            {{ point.predicted_price }},
+            {{ point.predicted_price|default:0 }},
             {% endfor %}
-        ].map(Number).filter(n => !Number.isNaN(n));
+        ].map(Number);
 
         const upper = [
             {% for point in latest_points %}
-            {{ point.confidence_upper }},
+            {{ point.confidence_upper|default:0 }},
             {% endfor %}
-        ].map(Number).filter(n => !Number.isNaN(n));
+        ].map(Number);
 
         const lower = [
             {% for point in latest_points %}
-            {{ point.confidence_lower }},
+            {{ point.confidence_lower|default:0 }},
             {% endfor %}
-        ].map(Number).filter(n => !Number.isNaN(n));
+        ].map(Number);
 
-        const hasData = labels.length > 0 && predicted.length > 0;
-
-        const fallbackLabels = ['Today'];
-        const fallbackData = [{{ latest_forecast.current_price|default_if_none:0 }}];
+        const hasData = labels.length > 0;
+        const fallbackLabels = ['No Data'];
+        const fallbackData = [0];
 
         new Chart(forecastCtx, {
             type: 'line',
@@ -237,35 +233,34 @@
                     label: 'Predicted',
                     data: hasData ? predicted : fallbackData,
                     borderColor: '#3b82f6',
-                    borderDash: [5, 5],
+                    borderWidth: 2,
+                    pointRadius: 3,
                     tension: 0.4,
                     fill: false
                 }, {
-                    label: 'Confidence Upper',
+                    label: 'Confidence Interval',
                     data: hasData ? upper : [],
-                    borderColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: 'transparent',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4,
-                    fill: '-1'
+                    fill: '+1' // Fills to the next dataset (lower)
                 }, {
-                    label: 'Confidence Lower',
+                    label: 'Lower Bound',
                     data: hasData ? lower : [],
-                    borderColor: 'rgba(59, 130, 246, 0.0)',
-                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                    borderColor: 'transparent',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4,
-                    fill: '-1'
+                    fill: false
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
                     y: {
                         beginAtZero: false,
-                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
                         ticks: { color: '#9ca3af' }
                     },
                     x: {
@@ -278,5 +273,3 @@
     }
 </script>
 {% endblock %}
-
-
